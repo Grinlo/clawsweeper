@@ -41,7 +41,7 @@ permissions:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
-  CLAWSWEEPER_APP_CLIENT_ID: Iv23liOECG0slfuhz093
+  CLAWSWEEPER_APP_CLIENT_ID: Iv23li3b535bWYoksFYY
 
 concurrency:
   group: commit-review-${{ github.event.inputs.target_repo || github.event.client_payload.target_repo || 'openclaw/openclaw' }}-${{ github.event.inputs.commit_sha || github.event.client_payload.after_sha || github.event.client_payload.commit_sha || github.run_id }}
@@ -252,12 +252,15 @@ jobs:
           if [ -z "$commits" ]; then
             commits="$COMMIT_SHA"
           fi
-          total_count="$(printf '%s\n' "$commits" | sed '/^$/d' | wc -l | tr -d ' ')"
+          total_count="$(printf '%s
+' "$commits" | sed '/^$/d' | wc -l | tr -d ' ')"
           page_size="$PAGE_SIZE"
           start_line=$((COMMIT_OFFSET + 1))
           end_line=$((COMMIT_OFFSET + page_size))
-          selected_commits="$(printf '%s\n' "$commits" | sed -n "${start_line},${end_line}p")"
-          selected_count="$(printf '%s\n' "$selected_commits" | sed '/^$/d' | wc -l | tr -d ' ')"
+          selected_commits="$(printf '%s
+' "$commits" | sed -n "${start_line},${end_line}p")"
+          selected_count="$(printf '%s
+' "$selected_commits" | sed '/^$/d' | wc -l | tr -d ' ')"
           next_offset=$((COMMIT_OFFSET + selected_count))
           has_more=false
           if [ "$next_offset" -lt "$total_count" ]; then
@@ -274,7 +277,9 @@ jobs:
             --has-more "$has_more" \
             --next-offset "$next_offset" >> "$GITHUB_OUTPUT"
           echo "Selected $selected_count/$total_count commits at offset $COMMIT_OFFSET"
-          printf 'Selected commits:\n%s\n' "$selected_commits"
+          printf 'Selected commits:
+%s
+' "$selected_commits"
 
       - uses: actions/upload-artifact@v7
         if: always()
