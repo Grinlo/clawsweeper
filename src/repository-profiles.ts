@@ -20,53 +20,62 @@ export interface RepositoryProfile {
   applyCloseRules: Partial<Record<RepositoryItemKind, readonly RepositoryCloseReason[]>>;
 }
 
-const OPENCLAW_CLOSE_REASONS: readonly RepositoryCloseReason[] = [
+const STANDARD_CLOSE_REASONS: readonly RepositoryCloseReason[] = [
   "implemented_on_main",
   "cannot_reproduce",
-  "clawhub",
   "duplicate_or_superseded",
   "not_actionable_in_repo",
   "incoherent",
   "stale_insufficient_info",
 ];
 
-export const DEFAULT_TARGET_REPO = "openclaw/openclaw";
+export const DEFAULT_TARGET_REPO = "Grinlo/grinlo-website";
 
 export const REPOSITORY_PROFILES: readonly RepositoryProfile[] = [
   {
-    targetRepo: DEFAULT_TARGET_REPO,
-    slug: "openclaw-openclaw",
-    displayName: "OpenClaw",
-    checkoutDir: "openclaw",
-    docsUrl: "https://docs.openclaw.ai",
-    communityUrl: "https://clawhub.ai/",
+    targetRepo: "Grinlo/grinlo-website",
+    slug: "grinlo-grinlo-website",
+    displayName: "Grinlo Website",
+    checkoutDir: "grinlo-website",
+    docsUrl: "https://grinlo.com",
     promptNote:
-      "Use the OpenClaw source tree, docs, changelog, and current main branch. Close proposals may use the normal OpenClaw stale/duplicate/not-in-repo/implemented-on-main policy when evidence is strong.",
+      "This is the main Grinlo.com website (Next.js, TypeScript). It serves NYC Central Park pedicab tour bookings. Review issues and PRs conservatively. Close proposals may use the normal stale/duplicate/not-in-repo/implemented-on-main policy when evidence is strong. Be careful with any UI or pricing changes.",
     applyCloseRules: {
-      issue: OPENCLAW_CLOSE_REASONS,
-      pull_request: OPENCLAW_CLOSE_REASONS.filter((reason) => reason !== "stale_insufficient_info"),
+      issue: STANDARD_CLOSE_REASONS,
+      pull_request: STANDARD_CLOSE_REASONS.filter((r) => r !== "stale_insufficient_info"),
     },
   },
   {
-    targetRepo: "openclaw/clawhub",
-    slug: "openclaw-clawhub",
-    displayName: "ClawHub",
-    checkoutDir: "clawhub",
-    communityUrl: "https://clawhub.ai/",
+    targetRepo: "Grinlo/tripuae-claude-agent",
+    slug: "grinlo-tripuae-claude-agent",
+    displayName: "Marina AI Agent",
+    checkoutDir: "tripuae-claude-agent",
     promptNote:
-      "Use the ClawHub source tree and current main branch. Review every issue and PR with the same evidence standard, but only propose auto-close for pull requests that are certainly implemented on main. Keep everything else open.",
+      "This is the Marina AI sales agent for TripUAE (Python, Telegram bot). Review issues and PRs conservatively. Any changes to the agent prompt, sales logic, or pricing integrations require extra scrutiny. Only propose auto-close for clearly implemented or duplicate items.",
     applyCloseRules: {
-      issue: [],
-      pull_request: ["implemented_on_main"],
+      issue: ["implemented_on_main", "duplicate_or_superseded", "not_actionable_in_repo", "incoherent"],
+      pull_request: ["implemented_on_main", "duplicate_or_superseded"],
     },
   },
   {
-    targetRepo: "openclaw/clawsweeper",
-    slug: "openclaw-clawsweeper",
-    displayName: "ClawSweeper",
+    targetRepo: "Grinlo/team-command-center",
+    slug: "grinlo-team-command-center",
+    displayName: "Team Command Center",
+    checkoutDir: "team-command-center",
+    promptNote:
+      "This is the TCC (Team Command Center) — internal task management system for the Grinlo/TripUAE bot fleet. Review issues and PRs conservatively. Only propose auto-close for clearly implemented or duplicate items. Never close issues that are about bot behavior or task lifecycle.",
+    applyCloseRules: {
+      issue: ["implemented_on_main", "duplicate_or_superseded", "not_actionable_in_repo", "incoherent"],
+      pull_request: ["implemented_on_main", "duplicate_or_superseded"],
+    },
+  },
+  {
+    targetRepo: "Grinlo/clawsweeper",
+    slug: "grinlo-clawsweeper",
+    displayName: "ClawSweeper (Grinlo fork)",
     checkoutDir: "clawsweeper",
     promptNote:
-      "Use the ClawSweeper source tree and current main branch. Review bot automation, workflow, and documentation changes conservatively. Only propose auto-close for pull requests that are certainly implemented on main; keep issues open for maintainer triage.",
+      "This is the Grinlo fork of ClawSweeper. Review bot automation, workflow, and configuration changes conservatively. Only propose auto-close for pull requests that are certainly implemented on main; keep issues open for maintainer triage.",
     applyCloseRules: {
       issue: [],
       pull_request: ["implemented_on_main"],
@@ -100,5 +109,7 @@ export function isAutoCloseAllowed(
   kind: RepositoryItemKind,
   reason: RepositoryCloseReason,
 ): boolean {
-  return Boolean(profile.applyCloseRules[kind]?.includes(reason));
+  const rules = profile.applyCloseRules[kind];
+  if (!rules) return false;
+  return rules.includes(reason);
 }
